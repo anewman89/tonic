@@ -284,7 +284,7 @@ class Segment(object):
             self.f.username = username
         else:
             self.f.username = getuser()
-	  self.f.username = self.f.username.encode()
+        self.f.username = self.f.username.encode()
         if version:
             self.f.version = version
         else:
@@ -293,7 +293,7 @@ class Segment(object):
                                                          "describe"]).rstrip()
             except:
                 self.f.version = 'unknown'
-	  self.f.version = self.f.version.encode()
+        self.f.version = self.f.version.encode()
 
         for attribute, value in kwargs.items():
             if hasattr(self.f, attribute):
@@ -302,8 +302,8 @@ class Segment(object):
                 print('Renaming to g_{0} to avoid '
                       'overwriting.'.format(attribute))
                 attribute = 'g_{0}'.format(attribute)
-	    if isinstance(value, str):
-		  value = value.encode()
+            if isinstance(value, str):
+                value = value.encode()
             setattr(self.f, attribute, value)
         return
 
@@ -357,8 +357,8 @@ End Date: {5}
             self.fields[name][:] = ncvar
             # Add the attributes
             for key, val in ncvar.attributes.items():
-		if isinstance(val, str):
-		    val = val.encode()
+                if isinstance(val, str):
+                    val = val.encode()
                 setattr(self.fields[name], key, val)
 
         return
@@ -427,8 +427,8 @@ End Date: {5}
                     self.fields[name].long_name = name.encode()
                     self.fields[name].coordinates = 'lon lat'.encode()
                     for key, val in field.items():
-			  if isinstance(val, str):
-			      val = val.encode()
+                        if isinstance(val, str):
+                            val = val.encode()
                         setattr(self.fields[name], key, val)
                 else:
                     raise ValueError('Field {0} missing units \

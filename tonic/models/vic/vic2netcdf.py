@@ -284,7 +284,7 @@ class Segment(object):
             self.f.username = username
         else:
             self.f.username = getuser()
-	self.f.username = self.f.username.encode()
+	  self.f.username = self.f.username.encode()
         if version:
             self.f.version = version
         else:
@@ -293,8 +293,8 @@ class Segment(object):
                                                          "describe"]).rstrip()
             except:
                 self.f.version = 'unknown'
-	self.f.version = self.f.version.encode()
-                
+	  self.f.version = self.f.version.encode()
+
         for attribute, value in kwargs.items():
             if hasattr(self.f, attribute):
                 print(
@@ -303,7 +303,7 @@ class Segment(object):
                       'overwriting.'.format(attribute))
                 attribute = 'g_{0}'.format(attribute)
 	    if isinstance(value, str):
-		value = value.encode()
+		  value = value.encode()
             setattr(self.f, attribute, value)
         return
 
@@ -427,8 +427,8 @@ End Date: {5}
                     self.fields[name].long_name = name.encode()
                     self.fields[name].coordinates = 'lon lat'.encode()
                     for key, val in field.items():
-			if isinstance(val, str):
-			    val = val.encode()
+			  if isinstance(val, str):
+			      val = val.encode()
                         setattr(self.fields[name], key, val)
                 else:
                     raise ValueError('Field {0} missing units \

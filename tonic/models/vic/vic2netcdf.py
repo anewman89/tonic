@@ -268,23 +268,21 @@ class Segment(object):
                    version=None,
                    **kwargs):
 
-        self.f.title = title.encode()
-        self.f.history = history.encode()
-        self.f.institution = institution.encode()
-        self.f.source = source.encode()
-        self.f.references = references.encode()
-        self.f.comment = comment.encode()
-        self.f.conventions = conventions.encode()
+        self.f.title = title
+        self.f.history = history
+        self.f.institution = institution
+        self.f.source = source
+        self.f.references = references
+        self.f.comment = comment
+        self.f.conventions = conventions
         if hostname:
             self.f.hostname = hostname
         else:
             self.f.hostname = socket.gethostname()
-        self.f.hostname = self.f.hostname.encode()
         if username:
             self.f.username = username
         else:
             self.f.username = getuser()
-        self.f.username = self.f.username.encode()
         if version:
             self.f.version = version
         else:
@@ -293,7 +291,6 @@ class Segment(object):
                                                          "describe"]).rstrip()
             except:
                 self.f.version = 'unknown'
-        self.f.version = self.f.version.encode()
 
         for attribute, value in kwargs.items():
             if hasattr(self.f, attribute):
@@ -302,8 +299,6 @@ class Segment(object):
                 print('Renaming to g_{0} to avoid '
                       'overwriting.'.format(attribute))
                 attribute = 'g_{0}'.format(attribute)
-            if isinstance(value, str):
-                value = value.encode()
             setattr(self.f, attribute, value)
         return
 
@@ -327,9 +322,9 @@ End Date: {5}
         self.f.createDimension('time', len(times[self.i0:self.i1]))
         time = self.f.createVariable('time', 'f8', ('time', ))
         time[:] = times[self.i0:self.i1]
-        time.long_name = 'time'.encode()
-        time.units = TIMEUNITS.encode()
-        time.calendar = calendar.encode()
+        time.long_name = 'time'
+        time.units = TIMEUNITS
+        time.calendar = calendar
         self.count = len(time)
         self.startdate = t0
         self.enddate = t1
@@ -357,8 +352,6 @@ End Date: {5}
             self.fields[name][:] = ncvar
             # Add the attributes
             for key, val in ncvar.attributes.items():
-                if isinstance(val, str):
-                    val = val.encode()
                 setattr(self.fields[name], key, val)
 
         return
@@ -424,11 +417,9 @@ End Date: {5}
                                                           zlib=False)
 
                 if 'units' in field:
-                    self.fields[name].long_name = name.encode()
-                    self.fields[name].coordinates = 'lon lat'.encode()
+                    self.fields[name].long_name = name
+                    self.fields[name].coordinates = 'lon lat'
                     for key, val in field.items():
-                        if isinstance(val, str):
-                            val = val.encode()
                         setattr(self.fields[name], key, val)
                 else:
                     raise ValueError('Field {0} missing units \
@@ -456,16 +447,31 @@ End Date: {5}
     def nc_add_data_standard(self, points):
         ys = points.get_ys()
         xs = points.get_xs()
-        for p in points:
-            for name in self.three_dim_vars:
-                data = points.get_data(name, self.slice)
-                self.f.variables[name][:, ys, xs] = data
-            for name in self.four_dim_vars:
-                varshape = self.f.variables[name].shape[1]
-                for i in pyrange(varshape):
-                    sn = name + str(i)
-                    self.f.variables[name][:, i, ys,
-                                           xs] = p.df[sn].values[self.slice]
+        for name in self.three_dim_vars:
+            yc = 0
+            dd = np.zeros(self.f.variables[name][:,ys,xs].shape)
+            for p in points:
+                dd[:,yc] = p.df[name].values[self.slice]
+                yc = yc + 1
+
+            self.f.variables[name][:,ys,xs] = dd
+            del dd
+
+        for name in self.four_dim_vars:
+            varshape = self.f.variables[name].shape[1]
+
+            for i in range(varshape):
+              yc = 0
+              dd = np.zeros(self.f.variables[name][:,i,ys,xs].shape)
+
+              for p in points:
+                sn = name + str(i)
+                dd[:,yc] = p.df[sn].values[self.slice]
+                yc = yc + 1
+
+              self.f.variables[name][:, i, ys,
+                                    xs] = dd
+              del dd
 
     def nc_write_data_from_array(self):
         """ write completed data arrays to disk """

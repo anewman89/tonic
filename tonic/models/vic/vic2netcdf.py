@@ -447,16 +447,31 @@ End Date: {5}
     def nc_add_data_standard(self, points):
         ys = points.get_ys()
         xs = points.get_xs()
-        for p in points:
-            for name in self.three_dim_vars:
-                data = points.get_data(name, self.slice)
-                self.f.variables[name][:, ys, xs] = data
-            for name in self.four_dim_vars:
-                varshape = self.f.variables[name].shape[1]
-                for i in pyrange(varshape):
-                    sn = name + str(i)
-                    self.f.variables[name][:, i, ys,
-                                           xs] = p.df[sn].values[self.slice]
+        for name in self.three_dim_vars:
+            yc = 0
+            dd = np.zeros(self.f.variables[name][:,ys,xs].shape)
+            for p in points:
+                dd[:,yc] = p.df[name].values[self.slice]
+                yc = yc + 1
+
+            self.f.variables[name][:,ys,xs] = dd
+            del dd
+
+        for name in self.four_dim_vars:
+            varshape = self.f.variables[name].shape[1]
+
+            for i in range(varshape):
+              yc = 0
+              dd = np.zeros(self.f.variables[name][:,i,ys,xs].shape)
+
+              for p in points:
+                sn = name + str(i)
+                dd[:,yc] = p.df[sn].values[self.slice]
+                yc = yc + 1
+
+              self.f.variables[name][:, i, ys,
+                                    xs] = dd
+              del dd
 
     def nc_write_data_from_array(self):
         """ write completed data arrays to disk """
